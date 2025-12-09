@@ -2,21 +2,39 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Shooter IA</title>
+<title>Shooter Game</title>
 <style>
-  html,body{
-    margin:0;
-    padding:0;
-    overflow:hidden;
-  }
-  #playBtn{
+  html,body{margin:0;padding:0;overflow:hidden;}
+  body{font-family:Arial}
+
+  canvas{display:block}
+
+  .ui{
     position:fixed;
-    bottom:20px;
-    right:20px;
-    padding:15px 25px;
-    font-size:18px;
-    cursor:pointer;
+    inset:0;
+    background:#111;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
   }
+
+  .menu{
+    background:#222;
+    padding:30px;
+    border-radius:10px;
+    width:300px;
+  }
+
+  .menu h2{margin-top:0}
+
+  select,button{
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    font-size:16px;
+  }
+
   #overlay{
     position:fixed;
     inset:0;
@@ -26,15 +44,37 @@
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    font-size:48px;
+    font-size:40px;
   }
 </style>
 </head>
 <body>
 
 <canvas id="game"></canvas>
-<button id="playBtn">JOUER</button>
 
+<!-- MENU AVANT PARTIE -->
+<div class="ui" id="menu">
+  <div class="menu">
+    <h2>Choisis ton équipement</h2>
+
+    <label>Arme</label>
+    <select id="weaponSelect">
+      <option value="pistol">Pistolet</option>
+    </select>
+
+    <label>Skin</label>
+    <select id="skinSelect">
+      <option value="#222">Noir</option>
+      <option value="#1abc9c">Vert</option>
+      <option value="#3498db">Bleu</option>
+      <option value="#e74c3c">Rouge</option>
+    </select>
+
+    <button onclick="startGame()">JOUER</button>
+  </div>
+</div>
+
+<!-- FIN DE PARTIE -->
 <div id="overlay">
   <div id="result"></div>
   <button onclick="location.reload()">REJOUER</button>
@@ -46,113 +86,111 @@ const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// ================= FOND ALEATOIRE =================
-const mapColors = [
-  "#4da6ff", // bleu
-  "#4caf50", // vert
-  "#9c27b0", // violet
-  "#ff9800", // orange
-  "#607d8b", // gris bleu
-  "#795548", // marron
-  "#009688"  // turquoise
-];
-
+// ========= MAP =========
+const mapColors = ["#4da6ff","#4caf50","#9c27b0","#ff9800","#607d8b"];
 let bgColor = mapColors[Math.floor(Math.random()*mapColors.length)];
 
-// ================= CONTROLES =================
+// ========= CLAVIER =========
 const keys = {};
-addEventListener("keydown", e=>keys[e.key.toLowerCase()]=true);
-addEventListener("keyup", e=>keys[e.key.toLowerCase()]=false);
+addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
 
 let playing = false;
 
-// ================= JOUEUR =================
+// ========= JOUEUR =========
 const player = {
   x:canvas.width/2,
   y:canvas.height/2,
   size:40,
-  speed:5
-};
-
-// ================= ENNEMI =================
-const enemy = {
-  x:200,
-  y:200,
-  size:40,
+  speed:5,
   life:3,
   maxLife:3,
-  dx:1,
-  dy:1,
-  shootCooldown:60
+  color:"#222"
 };
 
-// ================= BALLES =================
+// ========= ENNEMI =========
+const enemy = {
+  x:200,y:200,size:40,
+  life:3,maxLife:3,
+  dx:1,dy:1,
+  shoot:60
+};
+
+// ========= BALLES =========
 let bullets = [];
 let enemyBullets = [];
 
-// ================= MOVE =================
-function movePlayer(){
-  if(keys["z"]) player.y -= player.speed;
-  if(keys["s"]) player.y += player.speed;
-  if(keys["q"]) player.x -= player.speed;
-  if(keys["d"]) player.x += player.speed;
+// ========= START =========
+function startGame(){
+  player.color = skinSelect.value;
+  document.getElementById("menu").style.display="none";
+  playing = true;
 }
 
-// ================= IA ENNEMIE =================
+// ========= MOVE =========
+function movePlayer(){
+  if(keys["z"]) player.y-=player.speed;
+  if(keys["s"]) player.y+=player.speed;
+  if(keys["q"]) player.x-=player.speed;
+  if(keys["d"]) player.x+=player.speed;
+}
+
+// ========= IA ENNEMI =========
 function enemyAI(){
-  if(Math.random()<0.01){
+  if(Math.random()<0.02){
     enemy.dx = Math.random()*2-1;
     enemy.dy = Math.random()*2-1;
   }
-  enemy.x += enemy.dx*2;
-  enemy.y += enemy.dy*2;
+  enemy.x+=enemy.dx*2;
+  enemy.y+=enemy.dy*2;
 
   if(enemy.x<50||enemy.x>canvas.width-50) enemy.dx*=-1;
   if(enemy.y<50||enemy.y>canvas.height-50) enemy.dy*=-1;
 
-  enemy.shootCooldown--;
-  if(enemy.shootCooldown<=0){
+  enemy.shoot--;
+  if(enemy.shoot<=0){
     shootEnemy();
-    enemy.shootCooldown = 60 + Math.random()*60;
+    enemy.shoot = 60+Math.random()*60;
   }
 }
 
 function shootEnemy(){
-  const dx = player.x - enemy.x;
-  const dy = player.y - enemy.y;
-  const d = Math.hypot(dx,dy);
+  let dx=player.x-enemy.x;
+  let dy=player.y-enemy.y;
+  let d=Math.hypot(dx,dy);
   enemyBullets.push({
-    x:enemy.x+enemy.size/2,
-    y:enemy.y+enemy.size/2,
-    vx:(dx/d)*5,
-    vy:(dy/d)*5
+    x:enemy.x+20,y:enemy.y+20,
+    vx:(dx/d)*5,vy:(dy/d)*5
   });
 }
 
-// ================= SHOOT PLAYER =================
+// ========= TIR JOUEUR =========
 addEventListener("click",()=>{
   if(!playing) return;
   bullets.push({
-    x:player.x+player.size,
-    y:player.y+player.size/2,
+    x:player.x+40,
+    y:player.y+20,
     vx:8
   });
 });
 
-// ================= DRAW =================
+// ========= DRAW =========
 function drawPlayer(){
-  ctx.fillStyle="#222";
-  ctx.fillRect(player.x,player.y,player.size,player.size);
+  ctx.fillStyle=player.color;
+  ctx.fillRect(player.x,player.y,40,40);
+
+  // barre vie joueur
+  ctx.fillStyle="black";
+  ctx.fillRect(player.x,player.y-10,40,5);
+  ctx.fillStyle="lime";
+  ctx.fillRect(player.x,player.y-10,40*(player.life/player.maxLife),5);
 }
 
 function drawEnemy(){
   ctx.fillStyle="red";
-  ctx.fillRect(enemy.x,enemy.y,enemy.size,enemy.size);
-
-  ctx.fillStyle="black";
-  ctx.fillRect(enemy.x,enemy.y-8,enemy.size,5);
+  ctx.fillRect(enemy.x,enemy.y,40,40);
   ctx.fillStyle="lime";
-  ctx.fillRect(enemy.x,enemy.y-8,enemy.size*(enemy.life/enemy.maxLife),5);
+  ctx.fillRect(enemy.x,enemy.y-8,40*(enemy.life/enemy.maxLife),5);
 }
 
 function drawBullets(){
@@ -160,36 +198,35 @@ function drawBullets(){
   bullets.forEach((b,i)=>{
     b.x+=b.vx;
     ctx.fillRect(b.x,b.y,8,4);
-    if(b.x>enemy.x&&b.x<enemy.x+enemy.size&&b.y>enemy.y&&b.y<enemy.y+enemy.size){
-      enemy.life--;
-      bullets.splice(i,1);
+    if(b.x>enemy.x&&b.x<enemy.x+40&&b.y>enemy.y&&b.y<enemy.y+40){
+      enemy.life--; bullets.splice(i,1);
       if(enemy.life<=0) win();
     }
   });
 
   ctx.fillStyle="orange";
-  enemyBullets.forEach((b)=>{
-    b.x+=b.vx;
-    b.y+=b.vy;
+  enemyBullets.forEach((b,i)=>{
+    b.x+=b.vx; b.y+=b.vy;
     ctx.fillRect(b.x,b.y,6,6);
-    if(b.x>player.x&&b.x<player.x+player.size&&b.y>player.y&&b.y<player.y+player.size){
-      lose();
+    if(b.x>player.x&&b.x<player.x+40&&b.y>player.y&&b.y<player.y+40){
+      player.life--; enemyBullets.splice(i,1);
+      if(player.life<=0) lose();
     }
   });
 }
 
-// ================= FIN =================
+// ========= FIN =========
 function win(){ end("VICTOIRE 🏆"); }
 function lose(){ end("DÉFAITE ☠️"); }
-function end(txt){
+function end(t){
   playing=false;
-  result.textContent=txt;
+  result.textContent=t;
   overlay.style.display="flex";
 }
 
-// ================= LOOP =================
+// ========= LOOP =========
 function loop(){
-  ctx.fillStyle = bgColor;
+  ctx.fillStyle=bgColor;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
   if(playing){
@@ -202,14 +239,6 @@ function loop(){
   requestAnimationFrame(loop);
 }
 loop();
-
-// ================= START =================
-playBtn.onclick=()=>{
-  playing=true;
-  playBtn.style.display="none";
-};
 </script>
-
 </body>
 </html>
-
