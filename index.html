@@ -5,47 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculatrice</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #1a1a1a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
-        /* --- STYLE CALCULATRICE (LE LEURRE) --- */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .container { background-color: #000; padding: 20px; border-radius: 30px; text-align: center; width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        #calculatorInput { width: 100%; text-align: right; font-size: 3em; background: transparent; border: none; color: white; margin-bottom: 20px; outline: none; padding-right: 10px; box-sizing: border-box; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .btn { padding: 20px; font-size: 1.5em; border-radius: 50%; border: none; cursor: pointer; font-weight: 500; transition: 0.2s; display: flex; justify-content: center; align-items: center; height: 65px; width: 65px; }
-        .num { background: #333; color: white; }
-        .op { background: #ff9f0a; color: white; }
-        .special { background: #a5a5a5; color: black; }
-        .btn:active { filter: brightness(1.5); }
-        .zero { grid-column: span 2; width: 142px; border-radius: 40px; }
-
-        /* --- STYLE MESSAGERIE (L'APP CACHÉE) --- */
         #messaging, #login, #signup { display: none; }
         .app-container { display: none; width: 100vw; height: 100vh; background-color: #000; flex-direction: row; }
         
+        /* --- CALCULATRICE --- */
+        #calculatorInput { width: 100%; text-align: right; font-size: 3em; background: transparent; border: none; color: white; margin-bottom: 20px; outline: none; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .btn { padding: 20px; font-size: 1.5em; border-radius: 50%; border: none; cursor: pointer; height: 65px; width: 65px; display: flex; align-items: center; justify-content: center; }
+        .num { background: #333; color: white; }
+        .op { background: #ff9f0a; color: white; }
+        .special { background: #a5a5a5; color: black; }
+        .zero { grid-column: span 2; width: 142px; border-radius: 40px; }
+
+        /* --- MESSAGERIE --- */
         #userList { width: 260px; background-color: #111; border-right: 1px solid #333; display: flex; flex-direction: column; }
-        #userList h3 { padding: 20px; color: #ff9f0a; margin: 0; font-size: 1.2em; border-bottom: 1px solid #222; }
-        .user-item { padding: 15px 20px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; }
+        .search-area { padding: 15px; border-bottom: 1px solid #222; display: flex; gap: 5px; }
+        .search-area input { background: #222; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px; flex-grow: 1; font-size: 0.8em; }
+        .search-area button { background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 0 10px; }
+        
+        #contacts-list { flex-grow: 1; overflow-y: auto; }
+        .user-item { padding: 15px 20px; border-bottom: 1px solid #222; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .user-item:hover { background: #222; }
-        .nick-label { display: block; font-weight: bold; }
-        .real-name { font-size: 0.7em; color: #666; }
+        .delete-friend { color: #ff3b30; font-size: 0.8em; padding: 5px; }
 
         #messaging-main { flex-grow: 1; display: flex; flex-direction: column; background-color: #000; }
-        #chat-header { padding: 15px 20px; background: #111; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        #chat-header { padding: 15px 20px; background: #111; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
         #messages-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
-        .bubble { padding: 10px 15px; border-radius: 18px; max-width: 70%; word-wrap: break-word; font-size: 0.95em; line-height: 1.4; }
-        .mine { align-self: flex-end; background: #007aff; color: white; border-bottom-right-radius: 4px; }
-        .theirs { align-self: flex-start; background: #262629; color: white; border-bottom-left-radius: 4px; }
+        .bubble { padding: 10px 15px; border-radius: 18px; max-width: 70%; word-wrap: break-word; }
+        .mine { align-self: flex-end; background: #007aff; border-bottom-right-radius: 4px; }
+        .theirs { align-self: flex-start; background: #262629; border-bottom-left-radius: 4px; }
 
-        .input-area { padding: 15px; background: #111; display: flex; gap: 10px; align-items: center; }
-        .input-area input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid #333; background: #222; color: white; outline: none; }
+        .input-area { padding: 15px; background: #111; display: flex; gap: 10px; }
+        .input-area input { flex-grow: 1; padding: 12px; border-radius: 20px; border: none; background: #222; color: white; outline: none; }
         
-        /* --- MOBILE --- */
-        @media (max-width: 600px) {
-            #userList { width: 80px; }
-            #userList h3, .nick-label, .real-name { display: none; }
-            .user-item { text-align: center; font-size: 1.5em; }
-        }
+        @media (max-width: 600px) { #userList { width: 100px; } .search-area { flex-direction: column; } .nick-label { font-size: 0.7em; } }
     </style>
 </head>
 <body>
@@ -57,125 +52,101 @@
             <button class="btn special" onclick="deleteLast()">⌫</button>
             <button class="btn special" onclick="addOp('%')">%</button>
             <button class="btn op" onclick="addOp('/')">÷</button>
-            
-            <button class="btn num" onclick="addNum('7')">7</button>
-            <button class="btn num" onclick="addNum('8')">8</button>
-            <button class="btn num" onclick="addNum('9')">9</button>
-            <button class="btn op" onclick="addOp('*')">×</button>
-            
-            <button class="btn num" onclick="addNum('4')">4</button>
-            <button class="btn num" onclick="addNum('5')">5</button>
-            <button class="btn num" onclick="addNum('6')">6</button>
-            <button class="btn op" onclick="addOp('-')">−</button>
-            
-            <button class="btn num" onclick="addNum('1')">1</button>
-            <button class="btn num" onclick="addNum('2')">2</button>
-            <button class="btn num" onclick="addNum('3')">3</button>
-            <button class="btn op" onclick="addOp('+')">+</button>
-            
-            <button class="btn num zero" onclick="addNum('0')">0</button>
-            <button class="btn num" onclick="addNum('.')">.</button>
+            <button class="btn num" onclick="addNum('7')">7</button><button class="btn num" onclick="addNum('8')">8</button><button class="btn num" onclick="addNum('9')">9</button><button class="btn op" onclick="addOp('*')">×</button>
+            <button class="btn num" onclick="addNum('4')">4</button><button class="btn num" onclick="addNum('5')">5</button><button class="btn num" onclick="addNum('6')">6</button><button class="btn op" onclick="addOp('-')">−</button>
+            <button class="btn num" onclick="addNum('1')">1</button><button class="btn num" onclick="addNum('2')">2</button><button class="btn num" onclick="addNum('3')">3</button><button class="btn op" onclick="addOp('+')">+</button>
+            <button class="btn num zero" onclick="addNum('0')">0</button><button class="btn num" onclick="addNum('.')">.</button>
             <button class="btn op" onclick="calculate()">=</button>
         </div>
     </div>
 
     <div id="login" class="container" style="background: #1c1c1e;">
-        <h2 style="margin-bottom:20px;">Accès Sécurisé</h2>
-        <input type="text" id="loginUser" placeholder="Utilisateur" style="width:85%; padding:12px; border-radius:10px; border:none; background:#3a3a3c; color:white;"><br><br>
-        <input type="password" id="loginPass" placeholder="Mot de passe" style="width:85%; padding:12px; border-radius:10px; border:none; background:#3a3a3c; color:white;"><br><br>
-        <button onclick="login()" style="width:92%; background:#ff9f0a; padding:15px; border-radius:10px; border:none; color:white; font-weight:bold;">Se connecter</button>
-        <p style="font-size:0.8em; margin-top:15px;">Pas de compte ? <a href="#" onclick="showSignup()" style="color:#ff9f0a;">S'inscrire</a></p>
+        <h2>Accès</h2>
+        <input type="text" id="loginUser" placeholder="Utilisateur" style="width:85%; padding:10px; background:#333; color:white; border:none; border-radius:8px;"><br><br>
+        <input type="password" id="loginPass" placeholder="Mot de passe" style="width:85%; padding:10px; background:#333; color:white; border:none; border-radius:8px;"><br><br>
+        <button onclick="login()" style="width:90%; background:#ff9f0a; padding:12px; border:none; border-radius:8px; color:white; font-weight:bold;">Entrer</button>
+        <p style="font-size:0.8em; margin-top:10px;">Pas de compte ? <a href="#" onclick="showSignup()" style="color:#ff9f0a;">S'inscrire</a></p>
     </div>
 
     <div id="signup" class="container" style="background: #1c1c1e;">
-        <h2>Créer un compte</h2>
-        <input type="text" id="signUser" placeholder="Pseudo" style="width:85%; padding:12px; border-radius:10px; background:#3a3a3c; color:white; border:none;"><br><br>
-        <input type="password" id="signPass" placeholder="Mot de passe" style="width:85%; padding:12px; border-radius:10px; background:#3a3a3c; color:white; border:none;"><br><br>
-        <button onclick="signup()" style="width:92%; background:#28a745; padding:15px; border-radius:10px; border:none; color:white; font-weight:bold;">S'inscrire</button>
+        <h2>S'inscrire</h2>
+        <input type="text" id="signUser" placeholder="Pseudo" style="width:85%; padding:10px; background:#333; color:white; border:none; border-radius:8px;"><br><br>
+        <input type="password" id="signPass" placeholder="Mot de passe" style="width:85%; padding:10px; background:#333; color:white; border:none; border-radius:8px;"><br><br>
+        <button onclick="signup()" style="width:90%; background:#28a745; padding:12px; border:none; border-radius:8px; color:white; font-weight:bold;">Créer</button>
     </div>
 
     <div id="messaging" class="app-container">
         <div id="userList">
-            <h3>Contacts</h3>
+            <div class="search-area">
+                <input type="text" id="friendSearch" placeholder="Chercher pseudo...">
+                <button onclick="addFriend()">+</button>
+            </div>
             <div id="contacts-list"></div>
-            <button onclick="location.reload()" style="background:transparent; color:#555; border:none; margin-top:auto; padding:20px; cursor:pointer;">VERROUILLER</button>
+            <button onclick="location.reload()" style="background:transparent; color:#444; border:none; padding:10px; cursor:pointer; font-size:0.7em;">DECONNEXION</button>
         </div>
         <div id="messaging-main">
             <div id="chat-header">
-                <b id="active-chat-name">Sélectionnez un chat</b>
+                <b id="active-chat-name">Messagerie</b>
                 <button onclick="clearChat()" style="background:transparent; color:#ff3b30; border:none; cursor:pointer; font-size:0.8em;">Vider</button>
             </div>
             <div id="messages-box"></div>
             <div class="input-area">
                 <input type="text" id="msgInput" placeholder="Message..." onkeypress="if(event.key==='Enter') send()">
-                <button onclick="send()" style="background: #007aff; border-radius:50%; width:40px; height:40px;">↑</button>
+                <button onclick="send()" style="background: #007aff; color:white; border:none; border-radius:50%; width:40px; height:40px;">↑</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
         let currentUser = null, targetUser = null;
         let db_messages = JSON.parse(localStorage.getItem('secret_chat_msgs')) || {};
         let db_nicks = JSON.parse(localStorage.getItem('secret_chat_nicks')) || {};
-        let contactList = ['User1', 'User2', 'User3', 'User4'];
+        let db_friends = JSON.parse(localStorage.getItem('secret_chat_friends')) || [];
 
-        // --- CALCULATRICE LOGIQUE ---
         const calcDisplay = document.getElementById('calculatorInput');
+
+        // CALCULE
         function addNum(n) { if(calcDisplay.value === "0") calcDisplay.value = n; else calcDisplay.value += n; }
         function addOp(o) { calcDisplay.value += o; }
         function clearCalc() { calcDisplay.value = "0"; }
         function deleteLast() { calcDisplay.value = calcDisplay.value.slice(0, -1) || "0"; }
-
         function calculate() {
-            let val = calcDisplay.value;
-            if(val === "5624") { showLogin(); return; } // CODE SECRET
-            try { 
-                calcDisplay.value = eval(val.replace('×', '*').replace('÷', '/')); 
-            } catch { 
-                calcDisplay.value = "Error"; setTimeout(clearCalc, 1000); 
-            }
+            if(calcDisplay.value === "5624") { showLogin(); return; }
+            try { calcDisplay.value = eval(calcDisplay.value.replace('×', '*').replace('÷', '/')); } 
+            catch { calcDisplay.value = "Error"; setTimeout(clearCalc, 1000); }
         }
 
-        // --- NAVIGATION ---
+        // NAV
         function hideAll() { document.querySelectorAll('.container, .app-container').forEach(e => e.style.display='none'); }
         function showLogin() { hideAll(); document.getElementById('login').style.display='block'; }
         function showSignup() { hideAll(); document.getElementById('signup').style.display='block'; }
         function showApp() { hideAll(); document.getElementById('messaging').style.display='flex'; renderContacts(); }
 
-        // --- AUTH ---
-        function signup() {
-            let u = document.getElementById('signUser').value.trim();
-            let p = document.getElementById('signPass').value.trim();
-            if(u && p) { localStorage.setItem('auth_'+u, p); alert("Compte prêt"); showLogin(); }
-        }
-        function login() {
-            let u = document.getElementById('loginUser').value.trim();
-            let p = document.getElementById('loginPass').value.trim();
-            if(localStorage.getItem('auth_'+u) === p) { currentUser = u; showApp(); }
-            else alert("Accès refusé");
+        // FRIENDS LOGIQUE
+        function addFriend() {
+            let name = document.getElementById('friendSearch').value.trim();
+            if(name && !db_friends.includes(name)) {
+                db_friends.push(name);
+                localStorage.setItem('secret_chat_friends', JSON.stringify(db_friends));
+                document.getElementById('friendSearch').value = "";
+                renderContacts();
+            }
         }
 
-        // --- CHAT LOGIQUE ---
+        function removeFriend(name) {
+            db_friends = db_friends.filter(f => f !== name);
+            localStorage.setItem('secret_chat_friends', JSON.stringify(db_friends));
+            renderContacts();
+        }
+
         function renderContacts() {
             const container = document.getElementById('contacts-list');
-            container.innerHTML = contactList.map(u => `
-                <div class="user-item" onclick="selectChat('${u}')" oncontextmenu="setNick(event, '${u}')">
-                    <span class="nick-label">👤 ${db_nicks[u] || u}</span>
-                    ${db_nicks[u] ? `<span class="real-name">${u}</span>` : ''}
+            container.innerHTML = db_friends.map(u => `
+                <div class="user-item">
+                    <span onclick="selectChat('${u}')" class="nick-label" style="flex-grow:1;">👤 ${db_nicks[u] || u}</span>
+                    <span onclick="removeFriend('${u}')" class="delete-friend">✕</span>
                 </div>
             `).join('');
-        }
-
-        function setNick(e, u) {
-            e.preventDefault();
-            let n = prompt("Surnom pour " + u, db_nicks[u] || u);
-            if(n !== null) {
-                if(n.trim()==="") delete db_nicks[u]; else db_nicks[u] = n.trim();
-                localStorage.setItem('secret_chat_nicks', JSON.stringify(db_nicks));
-                renderContacts();
-                if(targetUser === u) selectChat(u);
-            }
         }
 
         function selectChat(u) {
@@ -187,32 +158,41 @@
         function loadMessages() {
             const box = document.getElementById('messages-box');
             if(!targetUser) return;
-            let history = db_messages[targetUser] || [];
-            box.innerHTML = history.map(m => `
-                <div class="bubble ${m.sender === currentUser ? 'mine' : 'theirs'}">
-                    ${m.text}
-                </div>
+            box.innerHTML = (db_messages[targetUser] || []).map(m => `
+                <div class="bubble ${m.sender === currentUser ? 'mine' : 'theirs'}">${m.text}</div>
             `).join('');
             box.scrollTop = box.scrollHeight;
         }
 
         function send() {
             let input = document.getElementById('msgInput');
-            let txt = input.value.trim();
-            if(txt && targetUser) {
+            if(input.value.trim() && targetUser) {
                 if(!db_messages[targetUser]) db_messages[targetUser] = [];
-                db_messages[targetUser].push({ sender: currentUser, text: txt });
+                db_messages[targetUser].push({ sender: currentUser, text: input.value.trim() });
                 localStorage.setItem('secret_chat_msgs', JSON.stringify(db_messages));
                 input.value = ""; loadMessages();
             }
         }
 
         function clearChat() {
-            if(targetUser && confirm("Supprimer l'historique ?")) {
+            if(targetUser && confirm("Vider le chat ?")) {
                 db_messages[targetUser] = [];
                 localStorage.setItem('secret_chat_msgs', JSON.stringify(db_messages));
                 loadMessages();
             }
+        }
+
+        function signup() {
+            let u = document.getElementById('signUser').value.trim();
+            let p = document.getElementById('signPass').value.trim();
+            if(u && p) { localStorage.setItem('auth_'+u, p); alert("Inscrit !"); showLogin(); }
+        }
+
+        function login() {
+            let u = document.getElementById('loginUser').value.trim();
+            let p = document.getElementById('loginPass').value.trim();
+            if(localStorage.getItem('auth_'+u) === p) { currentUser = u; showApp(); }
+            else alert("Identifiants incorrects");
         }
     </script>
 </body>
